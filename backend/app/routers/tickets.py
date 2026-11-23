@@ -29,6 +29,14 @@ class RecallBody(BaseModel):
         populate_by_name = True
 
 
+class WriteKeyBody(BaseModel):
+    # 幂等/重放键：同键重放返回原结局，零新增写入；缺省由服务端生成
+    请求键: str | None = Field(None, alias="请求键")
+
+    class Config:
+        populate_by_name = True
+
+
 @router.get("/号牌")
 def list_tickets(状态: str | None = Query(None)):
     with db() as conn:
@@ -60,9 +68,9 @@ def call_next(body: CallBody):
 
 
 @router.post("/号牌/{ticket_id}/过号")
-def skip(ticket_id: int):
-    with db() as conn:
-        return tic.mark_skip(conn, ticket_id)
+def skip(ticket_id: int, body: WriteKeyBody | None = None):
+    key = body.请求键 if body else None
+    return tic.mark_skip(ticket_id, key)
 
 
 @router.post("/号牌/{ticket_id}/重叫")
@@ -73,12 +81,18 @@ def recall(ticket_id: int, body: RecallBody | None = None):
 
 
 @router.post("/号牌/{ticket_id}/办结")
-def finish(ticket_id: int):
-    with db() as conn:
-        return tic.finish(conn, ticket_id)
+def finish(ticket_id: int, body: WriteKeyBody | None = None):
+    key = body.请求键 if body else None
+    return tic.finish(ticket_id, key)
 
 
 @router.post("/号牌/{ticket_id}/作废")
 def void(ticket_id: int):
     with db() as conn:
         return tic.void_ticket(conn, ticket_id)
+
+
+@router.get("/号牌/{ticket_id}/意图台账")
+def intents(ticket_id: int):
+    with db() as conn:
+        return tic.list_intents(conn, ticket_id)

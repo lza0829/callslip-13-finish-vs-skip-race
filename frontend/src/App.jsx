@@ -4,6 +4,7 @@ import Take from './pages/Take'
 import Wall from './pages/Wall'
 import Call from './pages/Call'
 import Skip from './pages/Skip'
+import Finished from './pages/Finished'
 import Windows from './pages/Windows'
 import Kinds from './pages/Kinds'
 import DaySeal from './pages/DaySeal'
@@ -14,6 +15,7 @@ const links = [
   ['/等候墙', '等候墙'],
   ['/叫号', '叫号'],
   ['/过号', '过号重叫'],
+  ['/办结', '办结页'],
   ['/窗口', '窗口'],
   ['/业务种类', '业务种类'],
   ['/日切', '日切封口'],
@@ -42,6 +44,7 @@ export default function App() {
           <Route path="/等候墙" element={<Wall />} />
           <Route path="/叫号" element={<Call />} />
           <Route path="/过号" element={<Skip />} />
+          <Route path="/办结" element={<Finished />} />
           <Route path="/窗口" element={<Windows />} />
           <Route path="/业务种类" element={<Kinds />} />
           <Route path="/日切" element={<DaySeal />} />

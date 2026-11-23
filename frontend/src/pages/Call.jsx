@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api } from '../api'
+import { api, requestKey } from '../api'
 
 export default function Call() {
   const [wins, setWins] = useState([])
@@ -28,12 +28,23 @@ export default function Call() {
     } catch (ex) { setErr(ex.message) }
   }
   const onFinish = async (id) => {
-    setErr('')
-    try { await api.finish(id); load() } catch (ex) { setErr(ex.message) }
+    setErr(''); setMsg('')
+    try {
+      const r = await api.finish(id, requestKey())
+      setMsg(r.重放 ? `重放原结局：${r.号牌.号牌} 已办结` : `${r.号牌.号牌} 已办结，窗口已释放`)
+      load()
+    } catch (ex) { setErr(ex.message) }
   }
   const onSkip = async (id) => {
-    setErr('')
-    try { await api.skip(id); load() } catch (ex) { setErr(ex.message) }
+    setErr(''); setMsg('')
+    try {
+      const r = await api.skip(id, requestKey())
+      setMsg(r.重放 ? `重放原结局：${r.号牌.号牌} 已过号` : `${r.号牌.号牌} 已过号，进入回收列表`)
+      load()
+    } catch (ex) {
+      // 争用/硬拒：展示后端中文拒因（如已办结则过号整笔拒绝）
+      setErr(ex.status === 409 ? `写口被拒：${ex.message}` : ex.message)
+    }
   }
   const current = wins.find(w => String(w.id) === String(wid))?.当前号
   return (
